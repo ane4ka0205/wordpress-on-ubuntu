@@ -1,0 +1,41 @@
+---
+- name: Download wordpress
+  hosts: ubuntu
+  tasks:
+    - name: Download package
+      when: ansible_distribution == "Ubuntu"
+      get_url:
+        url: https://wordpress.org/latest.tar.gz
+        dest: /tmp/latest.tar.gz
+
+
+    - name: Install apache2
+      when: ansible_distribution == "Ubuntu"
+      package:
+        name: "{{ item }}"
+      with_items:
+        - apache2
+        - php
+        - telnet
+        - php-mysql
+
+
+    - name: Unarchive the package
+      when: ansible_distribution == "Ubuntu"
+      unarchive:
+        src: /tmp/latest.tar.gz
+        dest: /var/www/html/
+        remote_src: yes
+
+
+    - name: Move wordpress folder
+      when: ansible_distribution == "Ubuntu"
+      shell: "mv /var/www/html/wordpress/*  /var/www/html/"
+      ignore_errors: true
+
+
+    - name: restart the apache2
+      when: ( anisble_distribution == "Ubuntu" )
+      service:
+        name: apache2
+        state: restarted
